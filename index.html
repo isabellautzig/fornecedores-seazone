@@ -226,13 +226,16 @@
   <header class="topo">
     <div>
       <h1>Storymakers e estadias</h1>
-      <p class="legenda">Quem grava conteúdo nos imóveis da Seazone, e o histórico de onde a Mônica já se hospedou — por cidade e bairro, com link direto pro anúncio.</p>
+      <p class="legenda">Quem grava conteúdo nos imóveis da Seazone, os espaços para eventos, e o histórico de onde a Mônica já se hospedou — por cidade e bairro, com link direto pro anúncio.</p>
     </div>
   </header>
 
   <nav class="secoes" role="tablist">
     <button role="tab" id="aba-story" aria-selected="true" aria-controls="sec-story">
       Storymakers <span class="n" id="conta-story"></span>
+    </button>
+    <button role="tab" id="aba-locais" aria-selected="false" aria-controls="sec-locais">
+      Locais para eventos <span class="n" id="conta-locais"></span>
     </button>
     <button role="tab" id="aba-hosp" aria-selected="false" aria-controls="sec-hosp">
       Estadias da Mônica <span class="n">17</span>
@@ -253,6 +256,22 @@
     </div>
 
     <div class="fichas" id="lista-story"></div>
+  </section>
+
+  <!-- ============ LOCAIS PARA EVENTOS ============ -->
+  <section id="sec-locais" role="tabpanel" aria-labelledby="aba-locais" hidden>
+    <div class="placar" id="placar-locais"></div>
+
+    <div class="barra">
+      <input type="text" class="busca" id="busca-locais" placeholder="Buscar nome, cidade, tipo de espaço…">
+      <select class="filtro" id="filtro-status-local">
+        <option value="">Todos os status</option>
+        <option>Ativo</option><option>Em negociação</option><option>Em teste</option><option>Descartado</option>
+      </select>
+      <button class="btn btn-forte empurra" id="btn-novo-local">Novo local</button>
+    </div>
+
+    <div class="fichas" id="lista-locais"></div>
   </section>
 
   <!-- ============ HOSPEDAGEM ============ -->
@@ -300,8 +319,16 @@
         <input type="text" id="f_telefone" placeholder="11 99999 9999">
       </div>
       <div class="largo">
-        <label for="f_servico">O que faz</label>
+        <label for="f_servico" id="rot_servico">O que faz</label>
         <input type="text" id="f_servico" placeholder="Ex.: stories e vídeos verticais nos imóveis de SP">
+      </div>
+      <div id="bloco_capacidade" hidden>
+        <label for="f_capacidade">Capacidade</label>
+        <input type="text" id="f_capacidade" placeholder="Ex.: 80 pessoas sentadas">
+      </div>
+      <div id="bloco_tipo" hidden>
+        <label for="f_tipo">Tipo de espaço</label>
+        <input type="text" id="f_tipo" placeholder="Ex.: rooftop, salão, restaurante">
       </div>
       <div>
         <label for="f_regiao">Cidade / praça</label>
@@ -425,9 +452,29 @@ const BASE = [
    telefone:"48 991480695", servico:"", contato:"", email:"", link:"", obs:"", nota:0}
 ];
 
+/* Locais para eventos — mesma ideia: a base vem no código, o que cada
+   pessoa cadastrar fica no navegador dela. */
+const CHAVE_LOCAIS = "seazone_locais_eventos_v1";
+const BASE_LOCAIS = [];
+
 let storymakers = [];
+let locais = [];
 let editandoId = null;
+let editandoTipo = "story";   // "story" ou "local"
 let filtroCidade = "";
+
+function carregarLocais(){
+  let salvos = null;
+  try{ salvos = JSON.parse(localStorage.getItem(CHAVE_LOCAIS)); }catch(e){}
+  if(!Array.isArray(salvos)){ locais = BASE_LOCAIS.map(l => ({...l})); return; }
+  const conhecidos = new Set(salvos.map(l => l.id));
+  const novos = BASE_LOCAIS.filter(l => !conhecidos.has(l.id)).map(l => ({...l}));
+  locais = [...salvos, ...novos].sort((a,b) => (a.nome||"").localeCompare(b.nome||""));
+  if(novos.length) guardarLocais();
+}
+function guardarLocais(){
+  try{ localStorage.setItem(CHAVE_LOCAIS, JSON.stringify(locais)); }catch(e){}
+}
 
 function carregarStory(){
   let salvas = null;
@@ -515,6 +562,65 @@ function desenhaStory(){
   }).join("");
 }
 
+/* ===================== locais para eventos ===================== */
+function desenhaLocais(){
+  const ativos = locais.filter(l => l.status === "Ativo").length;
+  const cidades = new Set(locais.map(l => (l.regiao||"").trim()).filter(Boolean)).size;
+  $("placar-locais").innerHTML = `
+    <div><div class="r">Locais</div><div class="v">${locais.length}</div></div>
+    <div><div class="r">Ativos</div><div class="v">${ativos}</div></div>
+    <div><div class="r">Cidades</div><div class="v">${cidades}</div></div>`;
+  $("conta-locais").textContent = locais.length || "";
+
+  const termo = $("busca-locais").value.trim().toLowerCase();
+  const status = $("filtro-status-local").value;
+  const alvo = $("lista-locais");
+
+  const lista = locais.filter(l => {
+    if(status && l.status !== status) return false;
+    if(!termo) return true;
+    return [l.nome,l.regiao,l.tipo,l.capacidade,l.servico,l.contato,l.obs]
+      .join(" ").toLowerCase().includes(termo);
+  });
+
+  if(!lista.length){
+    alvo.innerHTML = locais.length
+      ? `<div class="vazio">Nenhum local com esses filtros.</div>`
+      : `<div class="vazio"><b>Nenhum local cadastrado ainda</b>
+         Clique em “Novo local” pra guardar o primeiro espaço — nome, cidade, capacidade e contato.</div>`;
+    return;
+  }
+
+  alvo.innerHTML = lista.map(l => {
+    const zap = l.telefone ? "https://wa.me/55" + String(l.telefone).replace(/\D/g,"") : null;
+    const contatos = [
+      zap ? `<span><span class="rotulo">WhatsApp</span><a href="${esc(zap)}" target="_blank" rel="noopener">${esc(l.telefone)}</a></span>` : "",
+      l.email ? `<span><span class="rotulo">E-mail</span><a href="mailto:${esc(l.email)}">${esc(l.email)}</a></span>` : "",
+      l.link ? `<span><span class="rotulo">Site</span><a href="${esc(l.link.startsWith("http") ? l.link : "https://" + l.link)}" target="_blank" rel="noopener">${esc(l.link)}</a></span>` : "",
+      l.contato ? `<span><span class="rotulo">Falar com</span>${esc(l.contato)}</span>` : ""
+    ].filter(Boolean).join("");
+
+    return `<article class="ficha">
+      <div class="ficha-topo">
+        <h3>${esc(l.nome)}</h3>
+        ${l.regiao ? `<span class="praca">${esc(l.regiao)}</span>` : ""}
+        <span class="selo ${classeStatus(l.status)}">${esc(l.status || "—")}</span>
+        ${+l.nota > 0 ? `<span class="estrelas" title="${+l.nota} de 5">${"★".repeat(+l.nota)}</span>` : ""}
+      </div>
+      ${(l.tipo || l.capacidade) ? `<div class="faz">${
+        [l.tipo ? esc(l.tipo) : "", l.capacidade ? esc(l.capacidade) : ""].filter(Boolean).join(" · ")
+      }</div>` : ""}
+      ${l.servico ? `<div class="faz">${esc(l.servico)}</div>` : ""}
+      ${contatos ? `<div class="contatos">${contatos}</div>` : ""}
+      ${l.obs ? `<div class="anota">${esc(l.obs)}</div>` : ""}
+      <div class="ficha-acoes">
+        <button class="btn btn-fraco" data-editar-local="${esc(l.id)}">Editar</button>
+        <button class="btn btn-fraco btn-risco" data-excluir-local="${esc(l.id)}">Excluir</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+
 /* ===================== estadias ===================== */
 function desenhaHosp(){
   const termo = $("busca-hosp").value.trim().toLowerCase();
@@ -581,22 +687,41 @@ function linhaImovel(i){
 
 /* ===================== abas ===================== */
 function abrirSecao(qual){
-  const story = qual === "story";
-  $("aba-story").setAttribute("aria-selected", String(story));
-  $("aba-hosp").setAttribute("aria-selected", String(!story));
-  $("sec-story").hidden = !story;
-  $("sec-hosp").hidden = story;
+  [["story","aba-story","sec-story"],
+   ["locais","aba-locais","sec-locais"],
+   ["hosp","aba-hosp","sec-hosp"]].forEach(([id, aba, sec]) => {
+    const ativa = id === qual;
+    $(aba).setAttribute("aria-selected", String(ativa));
+    $(sec).hidden = !ativa;
+  });
 }
 
 /* ===================== formulário ===================== */
-function abrirForm(id){
+function abrirForm(id, tipo){
+  editandoTipo = tipo || "story";
   editandoId = id || null;
-  const s = id ? storymakers.find(x => x.id === id) : {};
-  $("titulo-modal").textContent = id ? "Editar storymaker" : "Nova storymaker";
-  ["nome","telefone","servico","regiao","contato","email","link","obs"]
+  const local = editandoTipo === "local";
+  const fonte = local ? locais : storymakers;
+  const s = id ? fonte.find(x => x.id === id) : {};
+
+  $("titulo-modal").textContent = local
+    ? (id ? "Editar local" : "Novo local para evento")
+    : (id ? "Editar storymaker" : "Nova storymaker");
+
+  ["nome","telefone","servico","regiao","contato","email","link","obs","capacidade","tipo"]
     .forEach(k => $("f_" + k).value = s[k] ?? "");
   $("f_status").value = s.status || "Em negociação";
   $("f_nota").value = String(s.nota || 0);
+
+  // campos que só fazem sentido pra local
+  $("bloco_capacidade").hidden = !local;
+  $("bloco_tipo").hidden = !local;
+  $("rot_servico").textContent = local ? "O que o espaço oferece" : "O que faz";
+  $("f_servico").placeholder = local
+    ? "Ex.: cozinha, som, estacionamento, permite decoração"
+    : "Ex.: stories e vídeos verticais nos imóveis de SP";
+  $("f_regiao").placeholder = local ? "Florianópolis - SC" : "São Paulo - SP";
+
   $("erro-modal").textContent = "";
   $("capa").classList.add("aberta");
   $("f_nome").focus();
@@ -607,39 +732,44 @@ function salvarForm(){
   const v = (k) => $("f_" + k).value.trim();
   if(!v("nome")){ $("erro-modal").textContent = "Escreva o nome."; return; }
 
+  const local = editandoTipo === "local";
   const corpo = {
-    id: editandoId || ("sm-" + Date.now().toString(36)),
+    id: editandoId || ((local ? "lc-" : "sm-") + Date.now().toString(36)),
     nome: v("nome"), status: v("status"), telefone: v("telefone"), servico: v("servico"),
     regiao: v("regiao"), contato: v("contato"), email: v("email"), link: v("link"),
     obs: v("obs"), nota: Number(v("nota")) || 0
   };
+  if(local){ corpo.capacidade = v("capacidade"); corpo.tipo = v("tipo"); }
 
-  storymakers = editandoId
-    ? storymakers.map(s => s.id === editandoId ? corpo : s)
-    : [...storymakers, corpo];
-  storymakers.sort((a,b) => (a.nome||"").localeCompare(b.nome||""));
+  const junta = (lista) => (editandoId
+    ? lista.map(x => x.id === editandoId ? corpo : x)
+    : [...lista, corpo]).sort((a,b) => (a.nome||"").localeCompare(b.nome||""));
 
-  guardarStory();
-  fecharForm();
-  desenhaStory();
+  if(local){ locais = junta(locais); guardarLocais(); fecharForm(); desenhaLocais(); }
+  else { storymakers = junta(storymakers); guardarStory(); fecharForm(); desenhaStory(); }
 }
 
-function excluir(id){
-  const s = storymakers.find(x => x.id === id);
-  if(!s) return;
-  if(!confirm(`Excluir ${s.nome}? Some da sua lista.`)) return;
-  storymakers = storymakers.filter(x => x.id !== id);
-  guardarStory();
-  desenhaStory();
+function excluir(id, tipo){
+  const local = tipo === "local";
+  const lista = local ? locais : storymakers;
+  const item = lista.find(x => x.id === id);
+  if(!item) return;
+  if(!confirm(`Excluir ${item.nome}? Some da sua lista.`)) return;
+  if(local){ locais = locais.filter(x => x.id !== id); guardarLocais(); desenhaLocais(); }
+  else { storymakers = storymakers.filter(x => x.id !== id); guardarStory(); desenhaStory(); }
 }
 
 /* ===================== eventos ===================== */
 $("aba-story").addEventListener("click", () => abrirSecao("story"));
+$("aba-locais").addEventListener("click", () => abrirSecao("locais"));
 $("aba-hosp").addEventListener("click", () => abrirSecao("hosp"));
 $("busca-story").addEventListener("input", desenhaStory);
 $("filtro-status").addEventListener("change", desenhaStory);
+$("busca-locais").addEventListener("input", desenhaLocais);
+$("filtro-status-local").addEventListener("change", desenhaLocais);
 $("busca-hosp").addEventListener("input", desenhaHosp);
-$("btn-nova").addEventListener("click", () => abrirForm());
+$("btn-nova").addEventListener("click", () => abrirForm(null, "story"));
+$("btn-novo-local").addEventListener("click", () => abrirForm(null, "local"));
 $("btn-cancelar").addEventListener("click", fecharForm);
 $("btn-salvar").addEventListener("click", salvarForm);
 $("capa").addEventListener("click", (e) => { if(e.target.id === "capa") fecharForm(); });
@@ -648,8 +778,14 @@ document.addEventListener("keydown", (e) => { if(e.key === "Escape") fecharForm(
 $("lista-story").addEventListener("click", (e) => {
   const ed = e.target.closest("[data-editar]");
   const ex = e.target.closest("[data-excluir]");
-  if(ed) abrirForm(ed.dataset.editar);
-  if(ex) excluir(ex.dataset.excluir);
+  if(ed) abrirForm(ed.dataset.editar, "story");
+  if(ex) excluir(ex.dataset.excluir, "story");
+});
+$("lista-locais").addEventListener("click", (e) => {
+  const ed = e.target.closest("[data-editar-local]");
+  const ex = e.target.closest("[data-excluir-local]");
+  if(ed) abrirForm(ed.dataset.editarLocal, "local");
+  if(ex) excluir(ex.dataset.excluirLocal, "local");
 });
 $("pilulas-cidade").addEventListener("click", (e) => {
   const p = e.target.closest("[data-cidade]");
@@ -660,8 +796,10 @@ $("pilulas-cidade").addEventListener("click", (e) => {
 
 /* ===================== primeira pintura ===================== */
 carregarStory();
+carregarLocais();
 desenhaHosp();
 desenhaStory();
+desenhaLocais();
 </script>
 </body>
 </html>
