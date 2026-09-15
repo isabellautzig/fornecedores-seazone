@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<style>html{color-scheme:light dark}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Storymakers e estadias</title></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root{
+    --ground:#F4F6F9;
+    --surface:#FFFFFF;
+    --sunk:#EDF0F5;
+    --ink:#101A2B;
+    --muted:#5E6E85;
+    --faint:#8B99AC;
+    --line:#DFE4EC;
+    --line-soft:#EAEEF4;
+    --azul:#0A52C9;
+    --azul-tinta:#E7EFFC;
+    --ok:#0B6E4F;
+    --ok-tinta:#E0F0E9;
+    --aviso:#9A5B08;
+    --aviso-tinta:#FBEEDC;
+    --off:#7E8AA0;
+    --off-tinta:#E9EDF3;
+    --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
+    --corpo:"Public Sans","Helvetica Neue",Arial,sans-serif;
+    --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0A1120; --surface:#111B2D; --sunk:#16223A;
+      --ink:#E9EEF7; --muted:#98A7BE; --faint:#77869E;
+      --line:#233149; --line-soft:#1B2740;
+      --azul:#76A6FF; --azul-tinta:#16274A;
+      --ok:#5DCCA0; --ok-tinta:#0F2E26;
+      --aviso:#E8AE5C; --aviso-tinta:#332612;
+      --off:#8B99AC; --off-tinta:#1C2840;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0A1120; --surface:#111B2D; --sunk:#16223A;
+    --ink:#E9EEF7; --muted:#98A7BE; --faint:#77869E;
+    --line:#233149; --line-soft:#1B2740;
+    --azul:#76A6FF; --azul-tinta:#16274A;
+    --ok:#5DCCA0; --ok-tinta:#0F2E26;
+    --aviso:#E8AE5C; --aviso-tinta:#332612;
+    --off:#8B99AC; --off-tinta:#1C2840;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--ground);color:var(--ink);
+    font:400 15px/1.55 var(--corpo);
+    -webkit-font-smoothing:antialiased;
+  }
+  .folha{max-width:1080px;margin:0 auto;padding:34px 22px 90px}
+  a{color:var(--azul)}
+  h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0}
+
+  /* ---------- cabeçalho ---------- */
+  .topo{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px}
+  h1{font-size:30px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+  .legenda{color:var(--muted);font-size:14px;margin-top:6px;max-width:62ch}
+
+  .secoes{display:flex;gap:26px;margin:26px 0 0;border-bottom:1px solid var(--line)}
+  .secoes button{
+    font:600 14.5px/1 var(--corpo);background:none;border:0;color:var(--muted);
+    padding:0 0 11px;cursor:pointer;position:relative;letter-spacing:.01em;
+  }
+  .secoes button[aria-selected="true"]{color:var(--ink)}
+  .secoes button[aria-selected="true"]::after{
+    content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--azul);
+  }
+  .secoes .n{font-family:var(--mono);font-size:12px;color:var(--faint);margin-left:5px}
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+    outline:2px solid var(--azul);outline-offset:2px;border-radius:3px;
+  }
+
+  /* ---------- números do topo ---------- */
+  .placar{display:flex;flex-wrap:wrap;gap:0 34px;margin:22px 0 4px}
+  .placar div{padding:2px 0}
+  .placar .v{font-family:var(--mono);font-size:21px;font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .placar .r{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--faint);font-weight:600}
+
+  /* ---------- avisos ---------- */
+  .avisos{display:flex;flex-direction:column;gap:7px;margin:18px 0 0}
+  .aviso{
+    font-size:13.2px;color:var(--muted);background:var(--surface);
+    border:1px solid var(--line-soft);border-left:3px solid var(--azul);
+    padding:9px 13px;border-radius:0 6px 6px 0;
+  }
+  .aviso.atencao{border-left-color:var(--aviso)}
+  .aviso b{color:var(--ink);font-weight:600}
+
+  /* ---------- controles ---------- */
+  .barra{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:22px 0 16px}
+  input[type=text],input[type=email],select,textarea{
+    font:400 14px/1.4 var(--corpo);color:var(--ink);background:var(--surface);
+    border:1px solid var(--line);border-radius:7px;padding:8px 11px;width:100%;
+  }
+  input::placeholder,textarea::placeholder{color:var(--faint)}
+  .busca{flex:1 1 200px;max-width:300px}
+  .filtro{width:auto;flex:0 0 auto}
+  .btn{
+    font:600 13.5px/1 var(--corpo);cursor:pointer;border-radius:7px;
+    border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 13px;
+  }
+  .btn:hover{border-color:var(--faint)}
+  .btn-forte{background:var(--azul);border-color:var(--azul);color:#fff}
+  .btn-forte:hover{filter:brightness(1.08)}
+  .btn-fraco{border-color:transparent;background:transparent;color:var(--muted);padding:6px 8px;font-size:13px}
+  .btn-fraco:hover{color:var(--ink);background:var(--sunk)}
+  .btn-risco:hover{color:#B3261E}
+  .empurra{margin-left:auto}
+
+  .pilulas{display:flex;flex-wrap:wrap;gap:6px}
+  .pilula{
+    font:600 12.5px/1 var(--corpo);cursor:pointer;border:1px solid var(--line);
+    background:var(--surface);color:var(--muted);border-radius:999px;padding:7px 12px;
+  }
+  .pilula[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+  .pilula .n{font-family:var(--mono);font-size:11px;opacity:.65;margin-left:4px}
+
+  /* ---------- storymakers ---------- */
+  .fichas{display:grid;gap:11px}
+  .ficha{
+    background:var(--surface);border:1px solid var(--line-soft);border-radius:9px;
+    padding:15px 17px;display:grid;gap:9px;
+  }
+  .ficha-topo{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+  .ficha h3{font-size:18px;font-weight:600;letter-spacing:-.01em}
+  .praca{font-size:13px;color:var(--muted)}
+  .estrelas{color:#C98A06;font-size:13px;letter-spacing:1px}
+  .faz{font-size:14px;color:var(--ink)}
+  .contatos{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:13.5px}
+  .contatos span,.contatos a{font-family:var(--mono);font-size:13px}
+  .contatos .rotulo{font-family:var(--corpo);color:var(--faint);margin-right:5px;font-size:12.5px}
+  .anota{
+    font-size:13px;color:var(--muted);background:var(--sunk);
+    border-radius:6px;padding:8px 11px;white-space:pre-wrap;
+  }
+  .ficha-acoes{display:flex;gap:2px;margin-top:2px}
+
+  .selo{
+    font:600 11.5px/1 var(--corpo);padding:4px 9px;border-radius:999px;letter-spacing:.02em;
+    display:inline-block;
+  }
+  .selo.ativo{background:var(--ok-tinta);color:var(--ok)}
+  .selo.negociacao{background:var(--aviso-tinta);color:var(--aviso)}
+  .selo.teste{background:var(--azul-tinta);color:var(--azul)}
+  .selo.descartado{background:var(--off-tinta);color:var(--off)}
+
+  /* ---------- hospedagem ---------- */
+  .cidade{margin:26px 0 0}
+  .cidade-nome{
+    display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+    padding-bottom:9px;border-bottom:1px solid var(--line);
+  }
+  .cidade-nome h2{font-size:19px;font-weight:600;letter-spacing:-.01em}
+  .cidade-nome .uf{font-family:var(--mono);font-size:12px;color:var(--faint);letter-spacing:.06em}
+  .cidade-nome .conta{font-size:12.5px;color:var(--muted);margin-left:auto;font-variant-numeric:tabular-nums}
+
+  .bairro{margin:15px 0 0;padding-left:15px;border-left:2px solid var(--line-soft)}
+  .bairro-nome{
+    font:600 11.5px/1 var(--corpo);text-transform:uppercase;letter-spacing:.1em;
+    color:var(--faint);margin-bottom:9px;
+  }
+  .imoveis{display:grid;gap:2px}
+  .imovel{
+    display:flex;flex-wrap:wrap;align-items:baseline;gap:5px 11px;
+    padding:9px 11px;border-radius:7px;background:var(--surface);
+    border:1px solid transparent;
+  }
+  .imovel:hover{border-color:var(--line-soft)}
+  .imovel .nome{font-size:14.5px;font-weight:500;flex:1 1 230px;min-width:0}
+  .imovel .predio{font-size:12.5px;color:var(--muted)}
+  .imovel .vezes{
+    font-family:var(--mono);font-size:11.5px;font-weight:500;color:var(--azul);
+    background:var(--azul-tinta);border-radius:999px;padding:3px 8px;
+  }
+  .imovel .ir{font-size:13.5px;font-weight:600;white-space:nowrap;text-decoration:none}
+  .imovel .ir:hover{text-decoration:underline}
+  .imovel .sem{font-size:12.5px;color:var(--faint);white-space:nowrap}
+  .imovel .marca{font:600 11px/1 var(--corpo);color:var(--aviso);letter-spacing:.02em}
+  .imovel .extra{flex-basis:100%;font-size:12.5px;color:var(--muted);padding-top:3px}
+  .imovel.fora .nome{color:var(--muted)}
+
+  /* ---------- vazios ---------- */
+  .vazio{
+    background:var(--surface);border:1px dashed var(--line);border-radius:9px;
+    padding:34px 20px;text-align:center;color:var(--muted);font-size:14px;
+  }
+  .vazio b{display:block;color:var(--ink);font-family:var(--display);font-size:16px;font-weight:600;margin-bottom:5px}
+
+  /* ---------- modal ---------- */
+  .capa{
+    position:fixed;inset:0;background:rgba(10,17,32,.5);z-index:40;
+    display:none;align-items:flex-start;justify-content:center;padding:28px 16px;overflow:auto;
+  }
+  .capa.aberta{display:flex}
+  .caixa{
+    background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    width:100%;max-width:560px;padding:22px;box-shadow:0 24px 60px rgba(10,17,32,.28);
+  }
+  .caixa h2{font-size:19px;font-weight:600;margin-bottom:16px}
+  .campos{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+  .campos label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;letter-spacing:.02em}
+  .largo{grid-column:1/-1}
+  textarea{min-height:66px;resize:vertical;font-family:var(--corpo)}
+  .caixa-acoes{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;align-items:center}
+  .erro{color:#B3261E;font-size:13px;font-weight:600;margin-right:auto}
+  @media(max-width:560px){.campos{grid-template-columns:1fr}}
+
+  [hidden]{display:none !important}
+  @media (prefers-reduced-motion:reduce){*{animation:none !important;transition:none !important}}
+</style>
+
+<div class="folha">
+
+  <header class="topo">
+    <div>
+      <h1>Storymakers e estadias</h1>
+      <p class="legenda">Quem grava conteúdo nos imóveis da Seazone, e o histórico de onde a Mônica já se hospedou — por cidade e bairro, com link direto pro anúncio.</p>
+    </div>
+  </header>
+
+  <nav class="secoes" role="tablist">
+    <button role="tab" id="aba-story" aria-selected="true" aria-controls="sec-story">
+      Storymakers <span class="n" id="conta-story"></span>
+    </button>
+    <button role="tab" id="aba-hosp" aria-selected="false" aria-controls="sec-hosp">
+      Estadias da Mônica <span class="n">17</span>
+    </button>
+  </nav>
+
+  <!-- ============ STORYMAKERS ============ -->
+  <section id="sec-story" role="tabpanel" aria-labelledby="aba-story">
+    <div class="placar" id="placar-story"></div>
+
+    <div class="barra">
+      <input type="text" class="busca" id="busca-story" placeholder="Buscar nome, cidade, o que faz…">
+      <select class="filtro" id="filtro-status">
+        <option value="">Todos os status</option>
+        <option>Ativo</option><option>Em negociação</option><option>Em teste</option><option>Descartado</option>
+      </select>
+      <button class="btn btn-forte empurra" id="btn-nova">Nova storymaker</button>
+    </div>
+
+    <div class="fichas" id="lista-story"></div>
+  </section>
+
+  <!-- ============ HOSPEDAGEM ============ -->
+  <section id="sec-hosp" role="tabpanel" aria-labelledby="aba-hosp" hidden>
+    <div class="placar" id="placar-hosp"></div>
+
+    <div class="avisos">
+      <div class="aviso">
+        <b>Reserva futura:</b> Haus Mitre Jardins, em São Paulo — 21 a 22 de outubro de 2026, código QC161J.
+      </div>
+      <div class="aviso atencao">
+        <b>Em 3 estadias a hóspede pode não ter sido ela:</b> no Lagoa Spot, no Veneto e no Skyline a reserva saiu na ficha da Mônica, mas quem preencheu o pré check-in foi outra pessoa.
+      </div>
+      <div class="aviso">
+        <b>3 imóveis não têm link:</b> saíram da carteira e por isso não existem mais no site — Quality Suítes Vila Olímpia, Mobi One Pinheiros e Penha SPOT.
+      </div>
+    </div>
+
+    <div class="barra">
+      <div class="pilulas" id="pilulas-cidade"></div>
+      <input type="text" class="busca" id="busca-hosp" placeholder="Buscar bairro, prédio, imóvel…">
+    </div>
+
+    <div id="lista-hosp"></div>
+  </section>
+</div>
+
+<!-- ============ MODAL ============ -->
+<div class="capa" id="capa">
+  <div class="caixa" role="dialog" aria-modal="true" aria-labelledby="titulo-modal">
+    <h2 id="titulo-modal">Nova storymaker</h2>
+    <div class="campos">
+      <div class="largo">
+        <label for="f_nome">Nome</label>
+        <input type="text" id="f_nome" placeholder="Ex.: Nayra">
+      </div>
+      <div>
+        <label for="f_status">Status</label>
+        <select id="f_status">
+          <option>Ativo</option><option>Em negociação</option><option>Em teste</option><option>Descartado</option>
+        </select>
+      </div>
+      <div>
+        <label for="f_telefone">Telefone / WhatsApp</label>
+        <input type="text" id="f_telefone" placeholder="11 99999 9999">
+      </div>
+      <div class="largo">
+        <label for="f_servico">O que faz</label>
+        <input type="text" id="f_servico" placeholder="Ex.: stories e vídeos verticais nos imóveis de SP">
+      </div>
+      <div>
+        <label for="f_regiao">Cidade / praça</label>
+        <input type="text" id="f_regiao" placeholder="São Paulo - SP">
+      </div>
+      <div>
+        <label for="f_contato">Contato (outra pessoa)</label>
+        <input type="text" id="f_contato">
+      </div>
+      <div>
+        <label for="f_email">E-mail</label>
+        <input type="email" id="f_email">
+      </div>
+      <div>
+        <label for="f_link">Site / Instagram</label>
+        <input type="text" id="f_link" placeholder="instagram.com/…">
+      </div>
+      <div class="largo">
+        <label for="f_nota">Avaliação</label>
+        <select id="f_nota">
+          <option value="0">Sem nota</option>
+          <option value="5">★★★★★ Excelente</option>
+          <option value="4">★★★★ Bom</option>
+          <option value="3">★★★ Regular</option>
+          <option value="2">★★ Ruim</option>
+          <option value="1">★ Péssimo</option>
+        </select>
+      </div>
+      <div class="largo">
+        <label for="f_obs">Observações</label>
+        <textarea id="f_obs" placeholder="Prazo de entrega, o que já combinaram, pontos de atenção…"></textarea>
+      </div>
+    </div>
+    <div class="caixa-acoes">
+      <span class="erro" id="erro-modal"></span>
+      <button class="btn" id="btn-cancelar">Cancelar</button>
+      <button class="btn btn-forte" id="btn-salvar">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   ESTADIAS DA MÔNICA — base fixa.
+   Endereço e número de estadias vieram do Sapron; o id e o título de
+   cada anúncio, da API do site de reservas. Conferido em 13/09/2026.
+   A URL do site só abre o imóvel com o sufixo abaixo: sem ele a página
+   responde 200 e renderiza vazia.
+   ===================================================================== */
+const FIM = "/qualquer;semana/adults=1;kids=0;babies=0";
+const L = (slug, id) => "https://seazone.com.br/acomodacoes/" + slug + "/" + id + FIM;
+
+const IMOVEIS = [
+  {cidade:"São Paulo", uf:"SP", bairro:"Vila Olímpia", predio:"Benx Vila Olímpia",
+   nome:"Estúdio completo na Vila Olímpia", vezes:3,
+   url:L("estudio-completo-na-vila-olimpia-vbx10618",6568)},
+  {cidade:"São Paulo", uf:"SP", bairro:"Vila Olímpia", predio:"Quality Suítes Long Stay",
+   nome:"Quality Suítes Long Stay Vila Olímpia", vezes:1, url:null, fora:true,
+   motivo:"saiu da carteira em junho de 2026"},
+  {cidade:"São Paulo", uf:"SP", bairro:"Jardins / Bela Vista", predio:"Haus Mitre Jardins",
+   nome:"Conforto c/ sacada em cond. na Bela Vista", vezes:2,
+   url:L("conforto-c-sacada-em-cond-na-bela-vista-hmj0916",6733),
+   extra:"Reserva futura: 21 a 22/10/2026, código QC161J"},
+  {cidade:"São Paulo", uf:"SP", bairro:"Jardins / Bela Vista", predio:"Haus Mitre Jardins",
+   nome:"Studio com varanda próximo à Paulista", vezes:1,
+   url:L("studio-com-varanda-proximo-a-paulista-hmj0712",6740)},
+  {cidade:"São Paulo", uf:"SP", bairro:"Sumarezinho", predio:"Cond. Ecos Vila Madalena",
+   nome:"Moderno no cond. Ecos Vila Madalena", vezes:1,
+   url:L("moderno-no-cond-ecos-vila-madalena-evm1012",3844)},
+  {cidade:"São Paulo", uf:"SP", bairro:"Pinheiros", predio:"Mobi One Pinheiros",
+   nome:"Mobi One Pinheiros", vezes:1, url:null, fora:true,
+   motivo:"saiu da carteira em março de 2025"},
+
+  {cidade:"Florianópolis", uf:"SC", bairro:"Jurerê", predio:"Jurerê Beach Village",
+   nome:"Vista p/ piscina em resort pé na areia", vezes:1,
+   url:L("vista-p-piscina-em-resort-pe-na-areia-jbv134",150)},
+  {cidade:"Florianópolis", uf:"SC", bairro:"Jurerê", predio:"Spot Jurerê",
+   nome:"Moderno estúdio vista beira-mar em Jurerê", vezes:1,
+   url:L("moderno-estudio-vista-beira-mar-em-jurere-spj0205",1796)},
+  {cidade:"Florianópolis", uf:"SC", bairro:"Lagoa da Conceição", predio:"Lagoa Spot",
+   nome:"Apto centrinho da Lagoa, rooftop c/ piscina", vezes:1, outro:true,
+   url:L("apto-centrinho-da-lagoa-rooftop-c-piscina-lst0019",5946)},
+  {cidade:"Florianópolis", uf:"SC", bairro:"Pantanal", predio:"Veneto",
+   nome:"Conforto próximo à UFSC Floripa", vezes:1, outro:true,
+   url:L("conforto-proximo-a-ufsc-floripa-sve407",1225)},
+  {cidade:"Florianópolis", uf:"SC", bairro:"Morro das Pedras", predio:"Rod. Francisco Thomaz dos Santos",
+   nome:"Casa em condomínio a 50 m do mar", vezes:1,
+   url:L("casa-em-condominio-apenas-50m-do-mar-fts0002",6063)},
+
+  {cidade:"Penha", uf:"SC", bairro:"Praia de Armação", predio:"Skyline",
+   nome:"Apto. c/ varanda em cond. c/ piscina", vezes:1, outro:true,
+   url:L("apto-c-varanda-em-cond-c-piscina-skl0607",7011)},
+  {cidade:"Penha", uf:"SC", bairro:"Praia de Armação", predio:"Penha SPOT",
+   nome:"Penha SPOT", vezes:1, url:null, fora:true,
+   motivo:"saiu da carteira em agosto de 2026"},
+
+  {cidade:"Imbituba", uf:"SC", bairro:"Praia do Rosa (Ibiraquera)", predio:"Rosa Spot",
+   nome:"Studio centrinho do Rosa, rooftop c/ piscina", vezes:1,
+   url:L("studio-centrinho-do-rosa-rooftop-c-piscina-rso0032",6032)},
+  {cidade:"Urubici", uf:"SC", bairro:"Centro", predio:"Urubici Spot",
+   nome:"Apto moderno c/ vista cid. em Urubici", vezes:1,
+   url:L("apto-moderno-c-vista-cid-em-urubici-ust0409",6363)},
+  {cidade:"Anitápolis", uf:"SC", bairro:"Rio dos Pinheiros", predio:"Vistas de Anitá",
+   nome:"Cabana incrível com vista panorâmica", vezes:1,
+   url:L("cabana-incrivel-com-vista-panoramica-vst010",195)},
+  {cidade:"Maceió", uf:"AL", bairro:"Pajuçara", predio:"New Time",
+   nome:"Apto vista mar na orla", vezes:1,
+   url:L("apto-vista-mar-na-orla-nwt0707",3133)}
+];
+const ORDEM = ["São Paulo","Florianópolis","Penha","Imbituba","Urubici","Anitápolis","Maceió"];
+const NOITES = 28;
+
+/* ===================== estado ===================== */
+/* A lista fica salva no navegador de quem abre — a página é pública,
+   então cada pessoa mantém a própria cópia a partir desta base. */
+const CHAVE = "seazone_storymakers_v1";
+const BASE = [
+  {id:"nayra", nome:"Nayra", status:"Ativo", regiao:"São Paulo - SP",
+   telefone:"11 99260728", servico:"", contato:"", email:"", link:"", obs:"", nota:0}
+];
+
+let storymakers = [];
+let editandoId = null;
+let filtroCidade = "";
+
+function carregarStory(){
+  try{
+    const bruto = localStorage.getItem(CHAVE);
+    storymakers = bruto === null ? BASE.map(s => ({...s})) : (JSON.parse(bruto) || []);
+  }catch(e){
+    storymakers = BASE.map(s => ({...s}));   // navegador bloqueou o armazenamento
+  }
+}
+function guardarStory(){
+  try{ localStorage.setItem(CHAVE, JSON.stringify(storymakers)); }catch(e){}
+}
+
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const classeStatus = (s) => ({"Ativo":"ativo","Em negociação":"negociacao",
+  "Em teste":"teste","Descartado":"descartado"}[s] || "descartado");
+
+/* ===================== storymakers ===================== */
+function placarStory(){
+  const ativas = storymakers.filter(s => s.status === "Ativo").length;
+  const pracas = new Set(storymakers.map(s => (s.regiao||"").trim()).filter(Boolean)).size;
+  const notas = storymakers.map(s => +s.nota || 0).filter(n => n > 0);
+  const media = notas.length ? (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1) : "—";
+  $("placar-story").innerHTML = `
+    <div><div class="r">Cadastradas</div><div class="v">${storymakers.length}</div></div>
+    <div><div class="r">Ativas</div><div class="v">${ativas}</div></div>
+    <div><div class="r">Praças</div><div class="v">${pracas}</div></div>
+    <div><div class="r">Nota média</div><div class="v">${media}</div></div>`;
+  $("conta-story").textContent = storymakers.length || "";
+}
+
+function desenhaStory(){
+  placarStory();
+  const termo = $("busca-story").value.trim().toLowerCase();
+  const status = $("filtro-status").value;
+  const alvo = $("lista-story");
+
+  const lista = storymakers.filter(s => {
+    if(status && s.status !== status) return false;
+    if(!termo) return true;
+    return [s.nome,s.regiao,s.servico,s.contato,s.email,s.obs].join(" ").toLowerCase().includes(termo);
+  });
+
+  if(!lista.length){
+    alvo.innerHTML = storymakers.length
+      ? `<div class="vazio">Nenhuma storymaker com esses filtros.</div>`
+      : `<div class="vazio"><b>Nenhuma storymaker ainda</b>
+         Clique em “Nova storymaker” pra cadastrar a primeira.</div>`;
+    return;
+  }
+
+  alvo.innerHTML = lista.map(s => {
+    const zap = s.telefone ? "https://wa.me/55" + String(s.telefone).replace(/\D/g,"") : null;
+    const contatos = [
+      zap ? `<span><span class="rotulo">WhatsApp</span><a href="${esc(zap)}" target="_blank" rel="noopener">${esc(s.telefone)}</a></span>` : "",
+      s.email ? `<span><span class="rotulo">E-mail</span><a href="mailto:${esc(s.email)}">${esc(s.email)}</a></span>` : "",
+      s.link ? `<span><span class="rotulo">Perfil</span><a href="${esc(s.link.startsWith("http") ? s.link : "https://" + s.link)}" target="_blank" rel="noopener">${esc(s.link)}</a></span>` : "",
+      s.contato ? `<span><span class="rotulo">Falar com</span>${esc(s.contato)}</span>` : ""
+    ].filter(Boolean).join("");
+
+    return `<article class="ficha">
+      <div class="ficha-topo">
+        <h3>${esc(s.nome)}</h3>
+        ${s.regiao ? `<span class="praca">${esc(s.regiao)}</span>` : ""}
+        <span class="selo ${classeStatus(s.status)}">${esc(s.status || "—")}</span>
+        ${+s.nota > 0 ? `<span class="estrelas" title="${+s.nota} de 5">${"★".repeat(+s.nota)}</span>` : ""}
+      </div>
+      ${s.servico ? `<div class="faz">${esc(s.servico)}</div>` : ""}
+      ${contatos ? `<div class="contatos">${contatos}</div>` : ""}
+      ${s.obs ? `<div class="anota">${esc(s.obs)}</div>` : ""}
+      <div class="ficha-acoes">
+        <button class="btn btn-fraco" data-editar="${esc(s.id)}">Editar</button>
+        <button class="btn btn-fraco btn-risco" data-excluir="${esc(s.id)}">Excluir</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+
+/* ===================== estadias ===================== */
+function desenhaHosp(){
+  const termo = $("busca-hosp").value.trim().toLowerCase();
+  const cidades = ORDEM.filter(c => IMOVEIS.some(i => i.cidade === c));
+
+  $("pilulas-cidade").innerHTML =
+    `<button class="pilula" aria-pressed="${filtroCidade===""}" data-cidade="">Todas
+      <span class="n">${IMOVEIS.length}</span></button>` +
+    cidades.map(c => `<button class="pilula" aria-pressed="${filtroCidade===c}" data-cidade="${esc(c)}">${esc(c)}
+      <span class="n">${IMOVEIS.filter(i=>i.cidade===c).length}</span></button>`).join("");
+
+  const lista = IMOVEIS.filter(i => {
+    if(filtroCidade && i.cidade !== filtroCidade) return false;
+    if(!termo) return true;
+    return [i.cidade,i.bairro,i.predio,i.nome].join(" ").toLowerCase().includes(termo);
+  });
+
+  const estadias = lista.reduce((t,i) => t + i.vezes, 0);
+  const bairros = new Set(lista.map(i => i.cidade + "|" + i.bairro)).size;
+  $("placar-hosp").innerHTML = `
+    <div><div class="r">Imóveis</div><div class="v">${lista.length}</div></div>
+    <div><div class="r">Estadias</div><div class="v">${estadias}</div></div>
+    <div><div class="r">Cidades</div><div class="v">${new Set(lista.map(i=>i.cidade)).size}</div></div>
+    <div><div class="r">Bairros</div><div class="v">${bairros}</div></div>
+    <div><div class="r">Noites</div><div class="v">${NOITES}</div></div>`;
+
+  const alvo = $("lista-hosp");
+  if(!lista.length){
+    alvo.innerHTML = `<div class="vazio">Nada encontrado. Tente outro bairro ou prédio.</div>`;
+    return;
+  }
+
+  alvo.innerHTML = cidades.filter(c => lista.some(i => i.cidade === c)).map(c => {
+    const daCidade = lista.filter(i => i.cidade === c);
+    const bairrosC = [...new Set(daCidade.map(i => i.bairro))];
+    const est = daCidade.reduce((t,i) => t + i.vezes, 0);
+    return `<section class="cidade">
+      <div class="cidade-nome">
+        <h2>${esc(c)}</h2><span class="uf">${esc(daCidade[0].uf)}</span>
+        <span class="conta">${daCidade.length} ${daCidade.length > 1 ? "imóveis" : "imóvel"} · ${est} ${est > 1 ? "estadias" : "estadia"}</span>
+      </div>
+      ${bairrosC.map(b => `<div class="bairro">
+        <div class="bairro-nome">${esc(b)}</div>
+        <div class="imoveis">
+          ${daCidade.filter(i => i.bairro === b).map(linhaImovel).join("")}
+        </div>
+      </div>`).join("")}
+    </section>`;
+  }).join("");
+}
+
+function linhaImovel(i){
+  return `<div class="imovel${i.fora ? " fora" : ""}">
+    <span class="nome">${esc(i.nome)}</span>
+    ${i.predio !== i.nome ? `<span class="predio">${esc(i.predio)}</span>` : ""}
+    ${i.vezes > 1 ? `<span class="vezes">${i.vezes} estadias</span>` : ""}
+    ${i.outro ? `<span class="marca">hóspede pode ser outra pessoa</span>` : ""}
+    ${i.url
+      ? `<a class="ir" href="${esc(i.url)}" target="_blank" rel="noopener">Ver no site →</a>`
+      : `<span class="sem">${esc(i.motivo || "fora do site")}</span>`}
+    ${i.extra ? `<span class="extra">${esc(i.extra)}</span>` : ""}
+  </div>`;
+}
+
+/* ===================== abas ===================== */
+function abrirSecao(qual){
+  const story = qual === "story";
+  $("aba-story").setAttribute("aria-selected", String(story));
+  $("aba-hosp").setAttribute("aria-selected", String(!story));
+  $("sec-story").hidden = !story;
+  $("sec-hosp").hidden = story;
+}
+
+/* ===================== formulário ===================== */
+function abrirForm(id){
+  editandoId = id || null;
+  const s = id ? storymakers.find(x => x.id === id) : {};
+  $("titulo-modal").textContent = id ? "Editar storymaker" : "Nova storymaker";
+  ["nome","telefone","servico","regiao","contato","email","link","obs"]
+    .forEach(k => $("f_" + k).value = s[k] ?? "");
+  $("f_status").value = s.status || "Em negociação";
+  $("f_nota").value = String(s.nota || 0);
+  $("erro-modal").textContent = "";
+  $("capa").classList.add("aberta");
+  $("f_nome").focus();
+}
+function fecharForm(){ $("capa").classList.remove("aberta"); editandoId = null; }
+
+function salvarForm(){
+  const v = (k) => $("f_" + k).value.trim();
+  if(!v("nome")){ $("erro-modal").textContent = "Escreva o nome."; return; }
+
+  const corpo = {
+    id: editandoId || ("sm-" + Date.now().toString(36)),
+    nome: v("nome"), status: v("status"), telefone: v("telefone"), servico: v("servico"),
+    regiao: v("regiao"), contato: v("contato"), email: v("email"), link: v("link"),
+    obs: v("obs"), nota: Number(v("nota")) || 0
+  };
+
+  storymakers = editandoId
+    ? storymakers.map(s => s.id === editandoId ? corpo : s)
+    : [...storymakers, corpo];
+  storymakers.sort((a,b) => (a.nome||"").localeCompare(b.nome||""));
+
+  guardarStory();
+  fecharForm();
+  desenhaStory();
+}
+
+function excluir(id){
+  const s = storymakers.find(x => x.id === id);
+  if(!s) return;
+  if(!confirm(`Excluir ${s.nome}? Some da sua lista.`)) return;
+  storymakers = storymakers.filter(x => x.id !== id);
+  guardarStory();
+  desenhaStory();
+}
+
+/* ===================== eventos ===================== */
+$("aba-story").addEventListener("click", () => abrirSecao("story"));
+$("aba-hosp").addEventListener("click", () => abrirSecao("hosp"));
+$("busca-story").addEventListener("input", desenhaStory);
+$("filtro-status").addEventListener("change", desenhaStory);
+$("busca-hosp").addEventListener("input", desenhaHosp);
+$("btn-nova").addEventListener("click", () => abrirForm());
+$("btn-cancelar").addEventListener("click", fecharForm);
+$("btn-salvar").addEventListener("click", salvarForm);
+$("capa").addEventListener("click", (e) => { if(e.target.id === "capa") fecharForm(); });
+document.addEventListener("keydown", (e) => { if(e.key === "Escape") fecharForm(); });
+
+$("lista-story").addEventListener("click", (e) => {
+  const ed = e.target.closest("[data-editar]");
+  const ex = e.target.closest("[data-excluir]");
+  if(ed) abrirForm(ed.dataset.editar);
+  if(ex) excluir(ex.dataset.excluir);
+});
+$("pilulas-cidade").addEventListener("click", (e) => {
+  const p = e.target.closest("[data-cidade]");
+  if(!p) return;
+  filtroCidade = p.dataset.cidade;
+  desenhaHosp();
+});
+
+/* ===================== primeira pintura ===================== */
+carregarStory();
+desenhaHosp();
+desenhaStory();
+</script>
+</body>
+</html>
