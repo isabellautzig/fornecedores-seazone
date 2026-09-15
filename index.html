@@ -420,7 +420,9 @@ const NOITES = 28;
 const CHAVE = "seazone_storymakers_v1";
 const BASE = [
   {id:"nayra", nome:"Nayra", status:"Ativo", regiao:"São Paulo - SP",
-   telefone:"11 99260728", servico:"", contato:"", email:"", link:"", obs:"", nota:0}
+   telefone:"11 99260728", servico:"", contato:"", email:"", link:"", obs:"", nota:0},
+  {id:"okta-filmes", nome:"OKTA Filmes", status:"Ativo", regiao:"Florianópolis - SC",
+   telefone:"48 991480695", servico:"", contato:"", email:"", link:"", obs:"", nota:0}
 ];
 
 let storymakers = [];
@@ -428,12 +430,19 @@ let editandoId = null;
 let filtroCidade = "";
 
 function carregarStory(){
-  try{
-    const bruto = localStorage.getItem(CHAVE);
-    storymakers = bruto === null ? BASE.map(s => ({...s})) : (JSON.parse(bruto) || []);
-  }catch(e){
-    storymakers = BASE.map(s => ({...s}));   // navegador bloqueou o armazenamento
+  let salvas = null;
+  try{ salvas = JSON.parse(localStorage.getItem(CHAVE)); }catch(e){}
+
+  if(!Array.isArray(salvas)){
+    storymakers = BASE.map(s => ({...s}));
+    return;
   }
+  // Quem já abriu a página antes tem a lista antiga guardada: traz também as
+  // da base que ainda não estão lá, sem mexer no que a pessoa já tinha editado.
+  const conhecidas = new Set(salvas.map(s => s.id));
+  const novas = BASE.filter(s => !conhecidas.has(s.id)).map(s => ({...s}));
+  storymakers = [...salvas, ...novas].sort((a,b) => (a.nome||"").localeCompare(b.nome||""));
+  if(novas.length) guardarStory();
 }
 function guardarStory(){
   try{ localStorage.setItem(CHAVE, JSON.stringify(storymakers)); }catch(e){}
